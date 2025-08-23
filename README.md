@@ -1,5 +1,8 @@
 # AppGen - macOS Application Bundle Generator
 
+>[!warning]
+> 本工具初步试验发现可能只支持 shell 脚本可执行文件进行打包然后去除黑窗口..
+
 AppGen 是一个用于将可执行文件打包成 macOS 应用程序包（.app 文件夹）的命令行工具。使用此工具，您可以轻松地将任何可执行文件转换为正式的 macOS 应用程序，且运行时不会显示终端窗口。
 
 ## 功能特点
