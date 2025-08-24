@@ -58,6 +58,11 @@ struct Args {
     /// By default, the terminal window is hidden
     #[arg(short = 't', long = "show-terminal", default_value_t = false)]
     show_terminal: bool,
+    
+    /// Enable single instance mode to ensure only one instance of the app runs per user
+    /// This adds code to prevent multiple instances of the application from running simultaneously
+    #[arg(short = 's', long = "single-instance", default_value_t = false)]
+    single_instance: bool,
 }
 
 fn main() -> Result<()> {
@@ -113,10 +118,9 @@ fn create_app_structure(args: &Args) -> Result<PathBuf> {
 /// Copies the executable to the app bundle
 fn copy_executable(args: &Args, app_path: &Path) -> Result<()> {
     let source_path = Path::new(&args.executable);
-    let target_path = app_path
-        .join("Contents")
-        .join("MacOS")
-        .join(source_path.file_name().unwrap());
+    let executable_name = source_path.file_name().unwrap();
+    let macos_dir = app_path.join("Contents").join("MacOS");
+    let target_path = macos_dir.join(executable_name);
     
     // Check if executable exists and is executable
     if !source_path.exists() {
@@ -133,6 +137,54 @@ fn copy_executable(args: &Args, app_path: &Path) -> Result<()> {
         .output()
         .context("Failed to set executable permissions")?;
     
+    // If single instance mode is enabled, create a wrapper script
+    if args.single_instance {
+        // Rename the original executable
+        let original_exec_path = macos_dir.join(format!("{}_original", executable_name.to_string_lossy()));
+        fs::rename(&target_path, &original_exec_path)
+            .context("Failed to rename original executable")?;
+        
+        // Create wrapper script for single instance check
+        let wrapper_script = format!(r#"#!/bin/bash
+
+# Single instance implementation
+APP_NAME="{app_name}"
+LOCK_FILE="/tmp/${{APP_NAME}}.lock"
+PID_FILE="/tmp/${{APP_NAME}}.pid"
+
+# Check if another instance is running
+if [ -f "$LOCK_FILE" ]; then
+    EXISTING_PID=$(cat "$PID_FILE" 2>/dev/null)
+    if [ ! -z "$EXISTING_PID" ]; then
+        if ps -p $EXISTING_PID > /dev/null; then
+            # Another instance is running, activate it
+            osascript -e 'tell application "{app_name}" to activate' 2>/dev/null
+            exit 0
+        fi
+    fi
+fi
+
+# Create lock file and store PID
+echo $$ > "$PID_FILE"
+touch "$LOCK_FILE"
+
+# Run the original executable
+SCRIPT_DIR="$( cd "$( dirname "${{BASH_SOURCE[0]}}" )" && pwd )"
+exec "$SCRIPT_DIR/{original_name}_original" "$@"
+
+# Clean up lock on exit
+trap 'rm -f "$LOCK_FILE" "$PID_FILE"' EXIT
+"#, app_name = args.name, original_name = executable_name.to_string_lossy());
+        
+        fs::write(&target_path, wrapper_script)
+            .context("Failed to write single instance wrapper script")?;
+        
+        Command::new("chmod")
+            .args(&["+x", &target_path.to_string_lossy()])
+            .output()
+            .context("Failed to set permissions on wrapper script")?;
+    }
+    
     Ok(())
 }
 
@@ -143,7 +195,8 @@ fn create_info_plist(args: &Args, app_path: &Path) -> Result<()> {
         .unwrap()
         .to_string_lossy();
     
-    let plist_data = plist::Dictionary::from_iter([
+    // Create initial plist entries
+    let mut plist_entries = vec![
         ("CFBundleName".to_string(), Value::String(args.name.clone())),
         ("CFBundleDisplayName".to_string(), Value::String(args.name.clone())),
         ("CFBundleIdentifier".to_string(), Value::String(args.bundle_id.clone())),
@@ -163,7 +216,16 @@ fn create_info_plist(args: &Args, app_path: &Path) -> Result<()> {
         ("LSMinimumSystemVersion".to_string(), Value::String("10.10.0".to_string())),
         ("LSUIElement".to_string(), Value::Boolean(!args.show_terminal)), // Controls terminal window visibility
         ("NSHighResolutionCapable".to_string(), Value::Boolean(true)),
-    ]);
+    ];
+    
+    // Add single instance configuration if enabled
+    if args.single_instance {
+        plist_entries.push(("JVFApplicationLaunchOnlyIfForeground".to_string(), Value::Boolean(false)));
+        plist_entries.push(("JVFApplicationActivateOnLaunch".to_string(), Value::Boolean(true)));
+        plist_entries.push(("JVFApplicationSingleInstanceModeEnabled".to_string(), Value::Boolean(true)));
+    }
+    
+    let plist_data = plist::Dictionary::from_iter(plist_entries);
     
     let plist_path = app_path.join("Contents").join("Info.plist");
     

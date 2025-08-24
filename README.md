@@ -13,6 +13,7 @@ AppGen 是一个用于将可执行文件打包成 macOS 应用程序包（.app �
 - 支持设置应用程序版本号、Bundle ID 等元数据
 - 支持添加额外的文件和文件夹到应用程序包中
 - 可选择是否在应用程序运行时显示终端窗口
+- 支持单例模式，确保每个用户只能运行一个应用程序实例
 
 ## 安装
 
@@ -51,6 +52,7 @@ appgen --executable <可执行文件路径> --name <应用程序名称>
 | `--additional-file` | `-a` | 要添加到应用程序包中的额外文件或文件夹 | (可选) |
 | `--default-location` | `-d` | 额外文件的默认位置 | resources |
 | `--show-terminal` | `-t` | 运行应用程序时显示终端窗口 | false |
+| `--single-instance` | `-s` | 确保应用程序在用户范围内仅运行一个实例 | false |
 
 ## 使用示例
 
@@ -96,6 +98,28 @@ appgen --executable ./my_program --name "My Application" \
 ```
 
 ### 控制终端窗口显示
+
+```bash
+# 创建显示终端窗口的应用
+appgen --executable ./my_program --name "My Application" --show-terminal
+
+# 创建不显示终端窗口的应用（默认行为）
+appgen --executable ./my_program --name "My Application"
+```
+
+### 启用单例模式
+
+```bash
+# 创建一个在用户范围内仅允许单实例运行的应用
+appgen --executable ./my_program --name "My Application" --single-instance
+
+# 组合使用多个选项
+appgen --executable ./my_program --name "My Application" \
+  --icon ./path/to/icon.icns \
+  --single-instance \
+  --show-terminal \
+  --bundle-id "com.yourcompany.myapp"
+```
 
 ```bash
 # 打包应用程序，运行时显示终端窗口
