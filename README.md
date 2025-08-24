@@ -3,7 +3,7 @@
 >[!warning]
 > 本工具初步试验发现可能只支持 shell 脚本可执行文件进行打包然后去除黑窗口..
 
-AppGen 是一个用于将可执行文件打包成 macOS 应用程序包（.app 文件夹）的命令行工具。使用此工具，您可以轻松地将任何可执行文件转换为正式的 macOS 应用程序，且运行时不会显示终端窗口。
+AppGen 是一个用于将可执行文件打包成 macOS 应用程序包（.app 文件夹）的命令行工具。使用此工具，您可以轻松地将任何可执行文件转换为正式的 macOS 应用程序，并可控制是否在运行时显示终端窗口。
 
 ## 功能特点
 
@@ -12,7 +12,7 @@ AppGen 是一个用于将可执行文件打包成 macOS 应用程序包（.app �
 - 自动生成必要的 Info.plist 文件
 - 支持设置应用程序版本号、Bundle ID 等元数据
 - 支持添加额外的文件和文件夹到应用程序包中
-- 打包后的应用程序运行时不会显示终端窗口
+- 可选择是否在应用程序运行时显示终端窗口
 
 ## 安装
 
@@ -50,6 +50,7 @@ appgen --executable <可执行文件路径> --name <应用程序名称>
 | `--output` | `-o` | 输出目录 | . |
 | `--additional-file` | `-a` | 要添加到应用程序包中的额外文件或文件夹 | (可选) |
 | `--default-location` | `-d` | 额外文件的默认位置 | resources |
+| `--show-terminal` | `-t` | 运行应用程序时显示终端窗口 | false |
 
 ## 使用示例
 
@@ -94,6 +95,20 @@ appgen --executable ./my_program --name "My Application" \
   --additional-file README.md
 ```
 
+### 控制终端窗口显示
+
+```bash
+# 打包应用程序，运行时显示终端窗口
+appgen --executable ./my_program --name "My Application" --show-terminal
+
+# 完整示例：创建带图标、显示终端窗口并添加额外文件的应用程序
+appgen --executable ./my_program --name "My Application" \
+  --icon ./path/to/icon.icns \
+  --show-terminal \
+  --additional-file config.json:Resources/config.json \
+  --bundle-id "com.yourcompany.myapp"
+```
+
 ## 添加文件格式
 
 `--additional-file` 选项的格式是 `源路径:目标路径`，其中：
@@ -102,6 +117,23 @@ appgen --executable ./my_program --name "My Application" \
 - `目标路径` 是该文件或文件夹在应用程序包中的相对路径（相对于 Contents 目录）
 
 如果不指定目标路径（只提供源路径），文件将被复制到由 `--default-location` 指定的默认位置。
+
+## 综合示例
+
+下面是一个结合多种选项的综合示例：
+
+```bash
+appgen --executable ./my_program --name "My Application" \
+  --icon ./path/to/icon.icns \
+  --app-version "2.1.0" \
+  --bundle-id "com.yourcompany.myapp" \
+  --output ~/Desktop \
+  --additional-file config.json:Resources/config.json \
+  --additional-file images:Resources/images \
+  --show-terminal
+```
+
+上面的命令会创建一个完整的 macOS 应用程序，包含自定义图标、版本号、额外文件和文件夹，并且运行时会显示终端窗口。
 
 ## 许可证
 

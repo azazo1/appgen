@@ -13,7 +13,7 @@ enum DefaultLocation {
     Contents,
 }
 
-/// A macOS app generator that packages an executable into an .app bundle without terminal window
+/// A macOS app generator that packages an executable into an .app bundle
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
@@ -53,6 +53,11 @@ struct Args {
     /// where additional files will be copied if no specific target is provided
     #[arg(short = 'd', long = "default-location", value_enum, default_value = "resources")]
     default_location: DefaultLocation,
+    
+    /// Show terminal window when the application runs
+    /// By default, the terminal window is hidden
+    #[arg(short = 't', long = "show-terminal", default_value_t = false)]
+    show_terminal: bool,
 }
 
 fn main() -> Result<()> {
@@ -156,7 +161,7 @@ fn create_info_plist(args: &Args, app_path: &Path) -> Result<()> {
         })),
         ("CFBundlePackageType".to_string(), Value::String("APPL".to_string())),
         ("LSMinimumSystemVersion".to_string(), Value::String("10.10.0".to_string())),
-        ("LSUIElement".to_string(), Value::Boolean(true)), // This prevents terminal window from showing
+        ("LSUIElement".to_string(), Value::Boolean(!args.show_terminal)), // Controls terminal window visibility
         ("NSHighResolutionCapable".to_string(), Value::Boolean(true)),
     ]);
     

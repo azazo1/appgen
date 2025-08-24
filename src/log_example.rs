@@ -7,7 +7,7 @@ fn main() {
         .write(true)
         .create(true)
         .append(true)
-        .open("./a.log")
+        .open("~/tmp/a.log")
         .unwrap();
     let now = Local::now();
     writeln!(f, "Current time: {}", now.format("%Y-%m-%d %H:%M:%S")).unwrap();
