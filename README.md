@@ -213,7 +213,7 @@ cp /path/to/appgen/completions/appgen.fish ~/.config/fish/completions/
 ln -s /path/to/appgen/completions/appgen.fish ~/.config/fish/completions/
 ```
 
-更多详细信息请参阅`completions/README.md`文件。
+更多详细信息请参阅 [`completions/README.md`](completions/README.md) 文件。
 
 ## 许可证
 
