@@ -1,7 +1,7 @@
 # AppGen - macOS Application Bundle Generator
 
 >[!warning]
-> 本工具初步试验发现可能只支持 shell 脚本可执行文件进行打包然后去除黑窗口..
+> 本工具初步试验发现可能只支持 shell 脚本可执行文件进行打包然后去除黑窗口.
 
 AppGen 是一个用于将可执行文件打包成 macOS 应用程序包（.app 文件夹）的命令行工具。使用此工具，您可以轻松地将任何可执行文件转换为正式的 macOS 应用程序，并可控制是否在运行时显示终端窗口。
 
@@ -21,7 +21,7 @@ AppGen 是一个用于将可执行文件打包成 macOS 应用程序包（.app �
 
 ```bash
 # 克隆仓库
-git clone https://github.com/yourusername/appgen.git
+git clone https://github.com/azazo1/appgen.git
 cd appgen
 
 # 编译
@@ -158,6 +158,62 @@ appgen --executable ./my_program --name "My Application" \
 ```
 
 上面的命令会创建一个完整的 macOS 应用程序，包含自定义图标、版本号、额外文件和文件夹，并且运行时会显示终端窗口。
+
+## Shell命令补全脚本
+
+AppGen提供了Bash、Zsh和Fish shell的命令行补全脚本，可以帮助您更轻松地使用命令行选项。
+
+### 安装补全脚本
+
+#### Bash
+
+将以下内容添加到您的`~/.bashrc`或`~/.bash_profile`：
+
+```bash
+source /path/to/appgen/completions/appgen.bash
+```
+
+或将文件复制到您的bash补全目录：
+
+```bash
+cp /path/to/appgen/completions/appgen.bash /etc/bash_completion.d/
+```
+
+#### Zsh
+
+将补全文件复制到您的`$fpath`目录之一：
+
+```zsh
+# 找到您的fpath目录
+echo $fpath
+
+# 然后复制文件，例如：
+cp /path/to/appgen/completions/_appgen ~/.zsh/completions/
+```
+
+或者将补全目录添加到您的`.zshrc`：
+
+```zsh
+fpath=(/path/to/appgen/completions $fpath)
+autoload -Uz compinit
+compinit
+```
+
+#### Fish
+
+将补全文件复制到您的fish补全目录：
+
+```fish
+cp /path/to/appgen/completions/appgen.fish ~/.config/fish/completions/
+```
+
+或创建符号链接：
+
+```fish
+ln -s /path/to/appgen/completions/appgen.fish ~/.config/fish/completions/
+```
+
+更多详细信息请参阅`completions/README.md`文件。
 
 ## 许可证
 
