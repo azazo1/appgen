@@ -215,6 +215,33 @@ ln -s /path/to/appgen/completions/appgen.fish ~/.config/fish/completions/
 
 更多详细信息请参阅 [`completions/README.md`](completions/README.md) 文件。
 
+## 辅助脚本
+
+AppGen 包含一些辅助脚本，用于简化应用程序开发过程。
+
+### icnsgen - 图标生成工具
+
+`icnsgen` 是一个用于从 PNG 图像生成 macOS 应用程序图标 (.icns) 的辅助脚本。该脚本可以将一个单一的高分辨率 PNG 图像转换为包含各种尺寸的 .icns 图标文件，适用于 macOS 应用程序。
+
+#### icnsgen 使用方法
+
+```bash
+./scripts/icnsgen input.png
+```
+
+这将生成与输入 PNG 文件同名但扩展名为 .icns 的图标文件（例如：input.icns）。
+
+#### 功能特性
+
+- 自动创建各种所需的图标尺寸（16×16 到 1024×1024）
+- 生成 @2x 高分辨率变体
+- 输出标准的 .icns 文件，可直接用于 AppGen 的 `--icon` 选项
+
+#### 系统要求
+
+- 需要 macOS 系统
+- 使用系统内置的 `sips` 和 `iconutil` 工具
+
 ## 许可证
 
 MIT
